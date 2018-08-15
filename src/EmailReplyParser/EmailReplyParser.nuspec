@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+  <metadata minClientVersion="2.12">
+    <id>EmailReplyParser</id>
+    <version>0.0.0</version>
+    <title>EmailReplyParser</title>
+    <authors>Joona-Pekka Kokko</authors>
+    <summary>Email reply parser</summary>
+    <description>Email reply parser ported from https://github.com/crisp-im/email-reply-parser.</description>
+    <language>en-US</language>
+    <projectUrl>https://github.com/jokokko/emailreplyparser</projectUrl>    
+    <licenseUrl>https://raw.githubusercontent.com/jokokko/emailreplyparser/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>email, reply, parser</tags>
+  </metadata>
+  <files>
+    <file src="bin\$configuration$\netstandard2.0\EmailReplyParser.dll" target="lib\netstandard2.0\EmailReplyParser.dll" />
+    <file src="bin\$configuration$\net46\EmailReplyParser.dll" target="lib\net46\EmailReplyParser.dll" />
+  </files>
+</package>
