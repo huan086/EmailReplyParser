@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <PackageId>LogicSoftware.EPEmailReplyParser</PackageId>
   </PropertyGroup>
 
   <PropertyGroup>
