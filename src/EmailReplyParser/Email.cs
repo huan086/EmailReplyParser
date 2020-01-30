@@ -30,7 +30,7 @@ namespace EmailReplyParser
 		{
 			var filteredFragments = Fragments.Where(filter);
 			
-			return Filter.Replace(string.Join(@"\n", filteredFragments), "");			
+			return Filter.Replace(string.Join(@"\n", filteredFragments), "").TrimEnd();			
 		}
 	}
 

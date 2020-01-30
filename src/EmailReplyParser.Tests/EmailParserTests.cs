@@ -11,12 +11,12 @@ namespace EmailReplyParser.Tests
 {
 	public sealed class EmailParserTests
 	{
-		private static readonly string COMMON_FIRST_FRAGMENT =
-			@"Fusce bibendum, quam hendrerit sagittis tempor, dui turpis tempus erat, pharetra sodales ante sem sit amet metus.
+        private static readonly string COMMON_FIRST_FRAGMENT =
+            @"Fusce bibendum, quam hendrerit sagittis tempor, dui turpis tempus erat, pharetra sodales ante sem sit amet metus.
 Nulla malesuada, orci non vulputate lobortis, massa felis pharetra ex, convallis consectetur ex libero eget ante.
 Nam vel turpis posuere, rhoncus ligula in, venenatis orci. Duis interdum venenatis ex a rutrum.
 Duis ut libero eu lectus consequat consequat ut vel lorem. Vestibulum convallis lectus urna,
-et mollis ligula rutrum quis. Fusce sed odio id arcu varius aliquet nec nec nibh.";
+et mollis ligula rutrum quis. Fusce sed odio id arcu varius aliquet nec nec nibh.".Replace("\r\n", "\n");
 
 		private static Email Get_email(string name)
 		{
@@ -88,7 +88,7 @@ et mollis ligula rutrum quis. Fusce sed odio id arcu varius aliquet nec nec nibh
 		{
 			var email = Get_email("email_emoji");
 
-			Assert.Equal(email.GetVisibleText(), "🎉\n");
+			Assert.Equal( "🎉", email.GetVisibleText());
 		}
 
 		[Fact]
@@ -386,8 +386,228 @@ et mollis ligula rutrum quis. Fusce sed odio id arcu varius aliquet nec nec nibh
 		{
 			var email = Get_email("email_sent_from");
 
-			Assert.Equal(email.GetVisibleText(),
-				"Hi it can happen to any texts you type, as long as you type in between words or paragraphs.\n");
+			Assert.Equal("Hi it can happen to any texts you type, as long as you type in between words or paragraphs.", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_outlook()
+		{
+			var email = Get_email("outlook");
+
+			Assert.Equal("13:33", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_outlook_2()
+		{
+			var email = Get_email("outlook_2");
+
+			Assert.Equal("Outlook email reply with a team mention in the email body.", email.GetVisibleText());
+		}
+
+
+		[Fact]
+		public void Test_email_2_3()
+		{
+			var email = Get_email("email_2_3");
+
+			Assert.Equal("Outlook with a reply directly above line", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_abnormal_quote_header_1()
+		{
+			var email = Get_email("email_abnormal_quote_header_1");
+
+			Assert.Equal("Thank you kindly!", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_abnormal_quote_header_2()
+		{
+			var email = Get_email("email_abnormal_quote_header_2");
+
+			Assert.Equal("Thank you very much for your email!\n\nem—dash coming through..", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_abnormal_quote_header_3()
+		{
+			var email = Get_email("email_abnormal_quote_header_3");
+
+			Assert.Equal("Hi Daniel,\n\n\nThank you very much for your email.\n\nSincerely,\nHomer Simpson\nNuclear Safety Inspector\n\nnuclear power plant, sector 7-G", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_abnormal_quote_header_4()
+		{
+			var email = Get_email("email_abnormal_quote_header_4");
+
+			Assert.Equal("From: Homer Simpson\nTo: Support\n\nEn–dash coming through~\n\nThank you very much for your email!", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_abnormal_quote_header_5()
+		{
+			var email = Get_email("email_abnormal_quote_header_5");
+
+			Assert.Equal("Hello from outlook.com!", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_abnormal_quote_header_long()
+		{
+			var email = Get_email("email_abnormal_quote_header_long");
+
+			Assert.Equal("*Caution* This is a really long email.", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_dashes_between_words()
+		{
+			var email = Get_email("email_dashes_between_words");
+
+			Assert.Equal("The text below is not a signature!\n\nParsing works correctly with mulit--dash between the words.\n\nThis__also!\n\n--Daniel", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_em_dash()
+		{
+			var email = Get_email("email_em_dash");
+
+			Assert.Equal("Thank you.", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_en_dash()
+		{
+			var email = Get_email("email_en_dash");
+
+			Assert.Equal("Thank you.", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_gmail()
+		{
+			var email = Get_email("email_gmail");
+
+			Assert.Equal("This is a test for inbox replying to a github message.", email.GetVisibleText());
+
+		}
+
+		[Fact]
+		public void Test_email_email_gmail_split_line_from()
+		{
+			var email = Get_email("email_gmail_split_line_from");
+
+			Assert.Equal("Fusce bibendum, quam hendrerit sagittis tempor, dui turpis tempus erat, pharetra sodales ante sem sit amet metus.\nNulla malesuada, orci non vulputate lobortis, massa felis pharetra ex, convallis consectetur ex libero eget ante.\nNam vel turpis posuere, rhoncus ligula in, venenatis orci. Duis interdum venenatis ex a rutrum.\nDuis ut libero eu lectus consequat consequat ut vel lorem. Vestibulum convallis lectus urna,\net mollis ligula rutrum quis. Fusce sed odio id arcu varius aliquet nec nec nibh.", email.GetVisibleText());
+
+		}
+
+		[Fact]
+		public void Test_email_email_headers_no_delimiter()
+		{
+			var email = Get_email("email_headers_no_delimiter");
+
+			Assert.Equal("And another reply!", email.GetVisibleText());
+
+		}
+
+		[Fact]
+		public void Test_email_email_ios_outlook()
+		{
+			var email = Get_email("email_ios_outlook");
+
+			Assert.Equal(COMMON_FIRST_FRAGMENT, email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_msn()
+		{
+			var email = Get_email("email_msn");
+
+			Assert.Equal(COMMON_FIRST_FRAGMENT, email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_outlook_split_line_from()
+		{
+			var email = Get_email("email_outlook_split_line_from");
+
+			Assert.Equal(COMMON_FIRST_FRAGMENT, email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_partial_quote_header()
+		{
+			var email = Get_email("email_partial_quote_header");
+
+			Assert.Equal("On your remote host you can run:\n\n     telnet 127.0.0.1 52698\n\nThis should connect to TextMate (on your Mac, via the tunnel). If that\nfails, the tunnel is not working.", email.GetVisibleText());
+
+		}
+
+		[Fact]
+		public void Test_email_email_reply_header()
+		{
+			var email = Get_email("email_reply_header");
+
+			Assert.Equal("This is the latest reply.\n\nThe thread contains two previous replies, and the most recent reply header has a line break in it.\n\nIf we don't patch the line break, the reply header ends up in THIS fragment, instead of in the quoted fragment.\n\nOn the one hand, there could be a line in the reply starting with the word 'On.'\n\nOn the other hand, it could happen TWICE!\n\nStranger", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_sig_delimiter_in_middle_of_line()
+		{
+			var email = Get_email("email_sig_delimiter_in_middle_of_line");
+
+			Assert.Equal("Hi there!\n\nStuff happened.\n\nAnd here is a fix -- this is not a signature.\n\nkthxbai", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_get_outlook()
+		{
+			var email = Get_email("get_outlook");
+
+			Assert.Equal("\nI am fine, thanks.\n\nJohn.", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_greedy_on()
+		{
+			var email = Get_email("greedy_on");
+
+			Assert.Equal("On your remote host you can run:\n\n     telnet 127.0.0.1 52698\n\nThis should connect to TextMate (on your Mac, via the tunnel). If that\nfails, the tunnel is not working.", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_pathological()
+		{
+			var email = Get_email("pathological");
+
+			Assert.Equal("I think you're onto something. I will try to fix the problem as soon as I\nget back to a computer.", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_email_24()
+		{
+			var email = Get_email("email_24");
+
+			Assert.Equal(COMMON_FIRST_FRAGMENT, email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_list_not_signature()
+		{
+			var email = Get_email("list_not_signature");
+
+			Assert.Equal("Hi folks\nMy list\n- first\n- second\n- third", email.GetVisibleText());
+		}
+
+		[Fact]
+		public void Test_email_unusial_outlook_format()
+		{
+			var email = Get_email("unusial_outlook_format");
+
+			Assert.Equal("Outlook with a reply above headers using unusual format", email.GetVisibleText());
 		}
 	}
 }

@@ -1,0 +1,14 @@
+13:33
+
+From: Test [mailto:test@testsoftware.net] 
+Sent: Wednesday, January 29, 2020 12:23 PM
+To: sometest@gmail.com
+Subject: Message has been added to task "Stage 1 - Project Planning" (ID: 7) - Test notification.
+
+Hi Administrator, here is what recently happened at Test:
+
+
+The notification was sent to you by Test. 
+
+ 
+

@@ -64,22 +64,28 @@ namespace EmailReplyParser
 			return parser.ParseImpl(text);
 		}
 
+        private string FixBrokenSignatures(string text)
+        {
+            text = quoteHeadersRegex.Aggregate(text, (sourceText, regex) =>
+            {
+                var matches = regex.Match(sourceText);
+
+                if (matches.Success)
+                {
+                    var replaceBy = matches.Groups[1].Value.Replace("\n", " ");
+                    sourceText = sourceText.Replace(matches.Groups[1].Value, replaceBy);
+                }
+
+                return sourceText;
+            });
+            return text;
+        }
+
 		private Email ParseImpl(string text)
 		{
 			text = RegexLinefeedWithCarriage.Replace(text, "\n");
 
-			text = quoteHeadersRegex.Aggregate(text, (sourceText, regex) =>
-			{
-				var matches = regex.Match(sourceText);
-
-				if (matches.Success)
-				{
-					var replaceBy = matches.Groups[1].Value.Replace("\n", " ");
-					sourceText = sourceText.Replace(matches.Groups[1].Value, replaceBy);
-				}
-
-				return sourceText;
-			});
+			text = FixBrokenSignatures(text);
 
 			FragmentDTO fragment = null;
 
