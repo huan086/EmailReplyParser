@@ -1,9 +1,8 @@
-# EmailReplyParser [![Build status](https://ci.appveyor.com/api/projects/status/egn8m4a0iqeq6ib0?svg=true)](https://ci.appveyor.com/project/jokokko/emailreplyparser) [![NuGet Version](http://img.shields.io/nuget/v/EmailReplyParser.svg?style=flat)](https://www.nuget.org/packages/EmailReplyParser/)
+# EmailReplyParser
+
 Email reply parser.
 
-**Package** [EmailReplyParser](https://www.nuget.org/packages/EmailReplyParser) | **Platforms** .NET 4.6, .NET Standard 2.0
-
-Quick .NET (C#) port of https://github.com/crisp-im/email-reply-parser with small amendments.
+Quick .NET (C#) port of https://github.com/crisp-im/email-reply-parser forked from https://github.com/jokokko/EmailReplyParser with update from different ports of the same library.
 
 ### Usage
 ```csharp
@@ -17,8 +16,10 @@ foreach (var fragment in otherEmail.Fragments)
 }
 ```
 
-### Original credits
+### Credits
 
-* GitHub
-* William Durand <william.durand1@gmail.com>
-* Crisp IM
+* GitHub (https://github.com/github/email_reply_parser)
+* William Durand <william.durand1@gmail.com> (https://github.com/willdurand/EmailReplyParser)
+* Crisp IM (https://github.com/crisp-dev/email-reply-parser)
+* Joona-Pekka Kokko <jokokko@gmail.com> (https://github.com/jokokko/EmailReplyParser)
+* LogicSoftware
