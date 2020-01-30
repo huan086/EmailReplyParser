@@ -16,5 +16,5 @@ RUN dotnet restore $projname/$projname.csproj
 COPY . .
 
 WORKDIR /src/$projname
-RUN dotnet pack /p:PackageVersion=$version -o packages
+RUN dotnet pack /p:Version=$packageversion -o packages
 RUN dotnet nuget push packages/LogicSoftware.EPEmailReplyParser.$packageversion.nupkg -k $key -s $nugetserver
