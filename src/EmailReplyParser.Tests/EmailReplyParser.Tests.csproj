@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EmailReplyParser\EmailReplyParser.csproj" />
+    <ProjectReference Include="..\EmailReplyParser\EPEmailReplyParser.csproj" />
   </ItemGroup>
 
   <ItemGroup>
