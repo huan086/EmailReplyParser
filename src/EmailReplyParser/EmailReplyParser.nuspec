@@ -2,7 +2,6 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata minClientVersion="2.12">
     <id>LogicSoftware.EmailReplyParser</id>
-    <version>0.0.0</version>
     <title>EmailReplyParser</title>
     <authors>Joona-Pekka Kokko</authors>
     <summary>Email reply parser</summary>
