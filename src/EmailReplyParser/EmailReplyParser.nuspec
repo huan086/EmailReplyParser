@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata minClientVersion="2.12">
-    <id>LogicSoftware.EmailReplyParser</id>
+    <id>LogicSoftware.EPEmailReplyParser</id>
     <version>1.0.0</version>
     <title>EmailReplyParser</title>
     <authors>Joona-Pekka Kokko</authors>
