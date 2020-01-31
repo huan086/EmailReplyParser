@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace EmailReplyParser
+namespace EPEmailReplyParser
 {
 	public static class RegexPatterns
 	{

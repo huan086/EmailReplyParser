@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EmailReplyParser
+namespace EPEmailReplyParser
 {
 	// ReSharper disable once InconsistentNaming
 	internal sealed class FragmentDTO

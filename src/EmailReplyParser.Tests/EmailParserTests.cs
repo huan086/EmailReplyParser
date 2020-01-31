@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using EPEmailReplyParser;
 using Xunit;
 
 #pragma warning disable xUnit2000
@@ -22,7 +23,7 @@ et mollis ligula rutrum quis. Fusce sed odio id arcu varius aliquet nec nec nibh
 		{
 			var data = File.ReadAllText(Path.Combine("resources", $"{name}.txt"));
 
-			return EmailReplyParser.Read(data);
+			return EPEmailReplyParser.EmailReplyParser.Read(data);
 		}
 
 		private static string Get_raw_email(string name)
@@ -376,7 +377,7 @@ et mollis ligula rutrum quis. Fusce sed odio id arcu varius aliquet nec nec nibh
 		[InlineData("Les Misאֳrables")]
 		public void Test_graphemes_preserved_in_reversing(string text)
 		{
-			var email = EmailReplyParser.Read(text);
+			var email = EPEmailReplyParser.EmailReplyParser.Read(text);
 
 			Assert.Equal(text, email.Fragments[0].Content);
 		}

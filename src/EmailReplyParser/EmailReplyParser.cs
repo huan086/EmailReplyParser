@@ -1,4 +1,4 @@
-namespace EmailReplyParser
+namespace EPEmailReplyParser
 {
 	public static class EmailReplyParser
 	{

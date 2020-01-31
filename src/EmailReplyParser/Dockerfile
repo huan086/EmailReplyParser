@@ -13,7 +13,7 @@ COPY EmailReplyParser/EmailReplyParser.nuspec $projname/
 
 RUN dotnet restore $projname/$projname.csproj
 
-COPY . .
+COPY EmailReplyParser $projname/
 
 WORKDIR /src/$projname
 RUN dotnet pack /p:Version=$packageversion -o packages

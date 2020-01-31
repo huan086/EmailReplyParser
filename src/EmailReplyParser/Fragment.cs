@@ -1,4 +1,4 @@
-namespace EmailReplyParser
+namespace EPEmailReplyParser
 {
 	public sealed class Fragment
 	{

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace EmailReplyParser
+namespace EPEmailReplyParser
 {
 	public sealed class Email
 	{
