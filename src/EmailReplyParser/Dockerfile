@@ -1,4 +1,4 @@
-﻿FROM microsoft/dotnet:2.2.104-sdk AS build
+﻿FROM mcr.microsoft.com/dotnet/core/sdk:3.0 as build
 
 ARG projname=EPEmailReplyParser
 ARG key=TODO
