@@ -610,5 +610,13 @@ et mollis ligula rutrum quis. Fusce sed odio id arcu varius aliquet nec nec nibh
 
 			Assert.Equal("Outlook with a reply above headers using unusual format", email.GetVisibleText());
 		}
+
+		[Fact]
+		public void Test_email_yahoo()
+		{
+			var email = Get_email("yahoo");
+
+			Assert.Equal("Yahoo email reply.", email.GetVisibleText());
+		}
 	}
 }
