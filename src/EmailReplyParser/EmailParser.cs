@@ -107,7 +107,7 @@ namespace EPEmailReplyParser
 						AddFragment(fragment);
 						fragment = null;
 					}
-					else if (line == "" && IsQuoteHeader(last))
+					else if (IsQuoteHeader(last))
 					{
 						fragment.IsQuoted = true;
 						AddFragment(fragment);
