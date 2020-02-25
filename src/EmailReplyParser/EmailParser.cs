@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace EmailReplyParser
+namespace EPEmailReplyParser
 {
 	public sealed class EmailParser
 	{
@@ -107,7 +107,7 @@ namespace EmailReplyParser
 						AddFragment(fragment);
 						fragment = null;
 					}
-					else if (line == "" && IsQuoteHeader(last))
+					else if (IsQuoteHeader(last))
 					{
 						fragment.IsQuoted = true;
 						AddFragment(fragment);

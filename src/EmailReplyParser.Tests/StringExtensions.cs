@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using EPEmailReplyParser;
 
 namespace EmailReplyParser.Tests
 {
