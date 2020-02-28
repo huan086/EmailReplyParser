@@ -19,6 +19,7 @@ namespace EPEmailReplyParser
 			new Regex(
 				@"^\s*((W\sdniu|Dnia)\s[\s\S]+?(pisze|napisał(\(a\))?):)$", RegexOptions.Multiline | RegexOptions.Compiled), // W dniu DATE, NAME <EMAIL> pisze|napisał:
 			new Regex(@"^\s*(Den\s.+\sskrev\s.+:)$", RegexOptions.Multiline | RegexOptions.Compiled), // Den DATE skrev NAME <EMAIL>:
+			new Regex(@"^\s*(Den\s.+\sskrev\s.+:)$", RegexOptions.Multiline | RegexOptions.Compiled), // Den DATE skrev NAME <EMAIL>:
 			new Regex(@"^\s*(pe\s.+\s.+kirjoitti:)$", RegexOptions.Multiline | RegexOptions.Compiled), // pe DATE NAME <EMAIL> kirjoitti: 
 			new Regex(@"^\s*(Am\s.+\sum\s.+\sschrieb\s.+:)$", RegexOptions.Multiline | RegexOptions.Compiled), // Am DATE um TIME schrieb NAME:
 			new Regex(@"^(在[\s\S]+写道：)$", RegexOptions.Multiline | RegexOptions.Compiled), // > 在 DATE, TIME, NAME 写道：
@@ -51,7 +52,8 @@ namespace EPEmailReplyParser
 			new Regex(@"^\s*([a-z]{3,4}\.\s[\s\S]+\sskrev\s[\s\S]+:)$", RegexOptions.Multiline | RegexOptions.Compiled), // DATE skrev NAME <EMAIL>:
 			new Regex(
 				@"^([0-9]{2}).([0-9]{2}).(20[0-9]{2})(.*)(([0-9]{2}).([0-9]{2}))(.*)""( *)<(.*)>( *):$", RegexOptions.Multiline | RegexOptions.Compiled), // DD.MM.20YY HH:II NAME <EMAIL>
-           	};
+            
+			   };
 
         public static readonly Regex[] SignatureRegex =
         {
@@ -75,7 +77,8 @@ namespace EPEmailReplyParser
 
             new Regex(@"^Diese Nachricht wurde von mein.* gesendet\.?$", RegexOptions.Compiled),
             new Regex(@"^Von mein.* gesendet\.?$", RegexOptions.Compiled),
-            new Regex(@"^Gesendet von mein.* ([a-zA-Z0-9_-]+\s*){1,3}\.?$", RegexOptions.Compiled)
+            new Regex(@"^Gesendet von mein.* ([a-zA-Z0-9_-]+\s*){1,3}\.?$", RegexOptions.Compiled),
+            new Regex(@"^\s*--------\s*Original\s?Message\s*--------\s*$", RegexOptions.Compiled),
 
             //  ~R/^Diese Nachricht wurde von mein.* gesendet\.?$/,
             // ~r/^Von mein.* gesendet\.?$/ ])	        ~R/^Von mein.* gesendet\.?$/,

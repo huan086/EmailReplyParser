@@ -618,5 +618,13 @@ et mollis ligula rutrum quis. Fusce sed odio id arcu varius aliquet nec nec nibh
 
 			Assert.Equal("Yahoo email reply.", email.GetVisibleText());
 		}
+
+        [Fact]
+        public void Test_email_webmail()
+        {
+            var email = Get_email("webmail");
+
+            Assert.Equal("Thank you Rebecca", email.GetVisibleText());
+        }
 	}
 }
