@@ -19,7 +19,6 @@ namespace EPEmailReplyParser
 			new Regex(
 				@"^\s*((W\sdniu|Dnia)\s[\s\S]+?(pisze|napisał(\(a\))?):)$", RegexOptions.Multiline | RegexOptions.Compiled), // W dniu DATE, NAME <EMAIL> pisze|napisał:
 			new Regex(@"^\s*(Den\s.+\sskrev\s.+:)$", RegexOptions.Multiline | RegexOptions.Compiled), // Den DATE skrev NAME <EMAIL>:
-			new Regex(@"^\s*(Den\s.+\sskrev\s.+:)$", RegexOptions.Multiline | RegexOptions.Compiled), // Den DATE skrev NAME <EMAIL>:
 			new Regex(@"^\s*(pe\s.+\s.+kirjoitti:)$", RegexOptions.Multiline | RegexOptions.Compiled), // pe DATE NAME <EMAIL> kirjoitti: 
 			new Regex(@"^\s*(Am\s.+\sum\s.+\sschrieb\s.+:)$", RegexOptions.Multiline | RegexOptions.Compiled), // Am DATE um TIME schrieb NAME:
 			new Regex(@"^(在[\s\S]+写道：)$", RegexOptions.Multiline | RegexOptions.Compiled), // > 在 DATE, TIME, NAME 写道：
