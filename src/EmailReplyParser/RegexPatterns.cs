@@ -51,7 +51,8 @@ namespace EPEmailReplyParser
 			new Regex(@"^\s*([a-z]{3,4}\.\s[\s\S]+\sskrev\s[\s\S]+:)$", RegexOptions.Multiline | RegexOptions.Compiled), // DATE skrev NAME <EMAIL>:
 			new Regex(
 				@"^([0-9]{2}).([0-9]{2}).(20[0-9]{2})(.*)(([0-9]{2}).([0-9]{2}))(.*)""( *)<(.*)>( *):$", RegexOptions.Multiline | RegexOptions.Compiled), // DD.MM.20YY HH:II NAME <EMAIL>
-           	};
+            
+			   };
 
         public static readonly Regex[] SignatureRegex =
         {
@@ -75,7 +76,8 @@ namespace EPEmailReplyParser
 
             new Regex(@"^Diese Nachricht wurde von mein.* gesendet\.?$", RegexOptions.Compiled),
             new Regex(@"^Von mein.* gesendet\.?$", RegexOptions.Compiled),
-            new Regex(@"^Gesendet von mein.* ([a-zA-Z0-9_-]+\s*){1,3}\.?$", RegexOptions.Compiled)
+            new Regex(@"^Gesendet von mein.* ([a-zA-Z0-9_-]+\s*){1,3}\.?$", RegexOptions.Compiled),
+            new Regex(@"^\s*--------\s*Original\s?Message\s*--------\s*$", RegexOptions.Compiled),
 
             //  ~R/^Diese Nachricht wurde von mein.* gesendet\.?$/,
             // ~r/^Von mein.* gesendet\.?$/ ])	        ~R/^Von mein.* gesendet\.?$/,

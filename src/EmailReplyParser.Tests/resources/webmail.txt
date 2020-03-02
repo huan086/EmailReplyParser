@@ -1,0 +1,12 @@
+Thank you Rebecca
+
+ -------- Original Message --------
+ Subject: Message has been added to task "Recorded Station Profiles"
+ (ID: 17295) - Test notification.
+ From: Test Notifier reply@go.testprojects.net>
+ Date: Fri, February 28, 2020 7:25 am
+ To: test@test.com
+
+ Hi T,  here is what recently happened at Easy Projects: Project #9432: T,T » 
+Task #17295: Recorded Station Profiles » T on Friday, February 28, 08:23 AM
+Good Morning! Did you want to keep the same station profiles for this year or use new ones? The notification was sent to you by Test Projects.
