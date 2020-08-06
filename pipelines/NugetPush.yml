@@ -1,0 +1,40 @@
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - src/EmailReplyParser/*
+
+pr: none
+
+parameters:
+- name: PackagePostfix
+  type: string
+  default: ' '
+
+variables:
+- template: /Deployment.Azure/Templates/MicroServices.Var.Common.yml@OPS
+- name:  'ServiceName'
+  value: 'EPEmailReplyParser'
+- name: 'ClientFolder'
+  value: 'EmailReplyParser'
+
+resources:
+  repositories:
+  - repository: OPS
+    type: git
+    name: EasyProjects/OPS
+    ref: refs/heads/master
+
+pool:
+  vmImage: $(vmImageName)
+
+stages:
+- template: /Deployment.Azure/Templates/Microservices.NugetPush.yml@OPS
+  parameters:
+    BuildNumber: 1.0.$(Build.BuildId)
+    DockerfilePath: src/${{ variables.ClientFolder}}/Dockerfile
+    NugetKey: ${{ variables.NugetKey }}
+    PackagePostfix: ${{ parameters.PackagePostfix }}
+    ServiceName: ${{ variables.ServiceName }}
