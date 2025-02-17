@@ -1,198 +1,197 @@
-﻿using System;
+namespace EPEmailReplyParser;
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace EPEmailReplyParser
+public sealed class EmailParser
 {
-	public sealed class EmailParser
-	{
-		private static readonly Regex QuoteRegex = new Regex(@"(>+)$", RegexOptions.Compiled);
+    private static readonly Regex QuoteRegex = new Regex(@"(>+)$", RegexOptions.Compiled);
 
-		private readonly List<FragmentDTO> fragments = new List<FragmentDTO>();
+    private readonly List<FragmentDTO> fragments = new List<FragmentDTO>();
 
-		private EmailParser(Regex[] quoteHeaders, Regex[] signatureRegex)
-		{
-			quoteHeadersRegex = quoteHeaders;
-			this.signatureRegex = signatureRegex;
-		}
+    private EmailParser(Regex[] quoteHeaders, Regex[] signatureRegex)
+    {
+        this.quoteHeadersRegex = quoteHeaders;
+        this.signatureRegex = signatureRegex;
+    }
 
-		private static string StringReverse(string text)
-		{			
-			var textElements = new List<string>();
-			
-			// To correctly preserve all graphemes
-			var textEnumerator = StringInfo.GetTextElementEnumerator(text);
+    private static string StringReverse(string text)
+    {
+        var textElements = new List<string>();
 
-			while (textEnumerator.MoveNext())
-			{
-				textElements.Add(textEnumerator.GetTextElement());
-			}
+        // To correctly preserve all graphemes
+        var textEnumerator = StringInfo.GetTextElementEnumerator(text);
 
-			textElements.Reverse();
-
-			return string.Concat(textElements);
-		}
-
-		private static string StringRTrim(string text, char mask)
-		{
-			for (var i = text.Length - 1; i >= 0; i--)
-			{
-				// ReSharper disable once InvertIf
-				if (mask != text[i])
-				{
-					text = text.Substring(0, i + 1);
-					break;
-				}
-			}
-			return text;
-		}
-
-		private static readonly Regex RegexWhitespace = new Regex(@"^\s+", RegexOptions.Compiled);
-
-		private static string StringLTrim(string text)
-		{
-			return RegexWhitespace.Replace(text, string.Empty);
-		}
-
-		private static readonly Regex RegexLinefeedWithCarriage = new Regex("\r\n", RegexOptions.Compiled);
-		
-		public static Email Parse(string text, Regex[] quoteHeaders = null, Regex[] signatureRegex = null)
-		{			
-			var parser = new EmailParser(quoteHeaders ?? RegexPatterns.QuoteHeadersRegex, signatureRegex ?? RegexPatterns.SignatureRegex);
-			return parser.ParseImpl(text);
-		}
-
-        private string FixBrokenSignatures(string text)
+        while (textEnumerator.MoveNext())
         {
-            text = quoteHeadersRegex.Aggregate(text, (sourceText, regex) =>
-            {
-                var matches = regex.Match(sourceText);
-
-                if (matches.Success)
-                {
-                    var replaceBy = matches.Groups[1].Value.Replace("\n", " ");
-                    sourceText = sourceText.Replace(matches.Groups[1].Value, replaceBy);
-                }
-
-                return sourceText;
-            });
-            return text;
+            textElements.Add(textEnumerator.GetTextElement());
         }
 
-		private Email ParseImpl(string text)
-		{
-			text = RegexLinefeedWithCarriage.Replace(text, "\n");
+        textElements.Reverse();
 
-			text = FixBrokenSignatures(text);
+        return string.Concat(textElements);
+    }
 
-			FragmentDTO fragment = null;
+    private static string StringRTrim(string text, char mask)
+    {
+        for (var i = text.Length - 1; i >= 0; i--)
+        {
+            // ReSharper disable once InvertIf
+            if (mask != text[i])
+            {
+                text = text[..(i + 1)];
+                break;
+            }
+        }
+        return text;
+    }
 
-			foreach (var newLine in StringReverse(text).Split(new[] { "\n" }, StringSplitOptions.None))
-			{
-				var line = StringRTrim(newLine, '\n');
+    private static readonly Regex RegexWhitespace = new Regex(@"^\s+", RegexOptions.Compiled);
 
-				if (!IsSignature(line))
-				{
-					line = StringLTrim(line);
-				}
+    private static string StringLTrim(string text)
+    {
+        return RegexWhitespace.Replace(text, string.Empty);
+    }
 
-				if (fragment != null)
-				{
-					var last = fragment.Lines[fragment.Lines.Count - 1];
-					if (IsSignature(last))
-					{
-						fragment.IsSignature = true;
-						AddFragment(fragment);
-						fragment = null;
-					}
-					else if (IsQuoteHeader(last))
-					{
-						fragment.IsQuoted = true;
-						AddFragment(fragment);
-						fragment = null;
-					}
-				}
+    private static readonly Regex RegexLinefeedWithCarriage = new Regex("\r\n", RegexOptions.Compiled);
 
-				var isQuoted = IsQuote(line);
+    public static Email Parse(string text, Regex[] quoteHeaders = null, Regex[] signatureRegex = null)
+    {
+        var parser = new EmailParser(quoteHeaders ?? RegexPatterns.QuoteHeadersRegex, signatureRegex ?? RegexPatterns.SignatureRegex);
+        return parser.ParseImpl(text);
+    }
 
-				if (fragment == null || !IsFragmentLine(fragment, line, isQuoted))
-				{
-					if (fragment != null)
-					{
-						AddFragment(fragment);
-					}
+    private string FixBrokenSignatures(string text)
+    {
+        text = this.quoteHeadersRegex.Aggregate(text, (sourceText, regex) =>
+        {
+            var matches = regex.Match(sourceText);
 
-					fragment = new FragmentDTO { IsQuoted = isQuoted };
-				}
+            if (matches.Success)
+            {
+                var replaceBy = matches.Groups[1].Value.Replace("\n", " ");
+                sourceText = sourceText.Replace(matches.Groups[1].Value, replaceBy);
+            }
 
-				fragment.Lines.Add(line);
-			}
+            return sourceText;
+        });
+        return text;
+    }
 
-			if (fragment != null)
-			{
-				AddFragment(fragment);
-			}
+    private Email ParseImpl(string text)
+    {
+        text = RegexLinefeedWithCarriage.Replace(text, "\n");
 
-			var email = CreateEmail(fragments);
+        text = this.FixBrokenSignatures(text);
 
-			return email;
-		}
+        FragmentDTO fragment = null;
 
-		private static readonly Regex RegexStartsWithNewline = new Regex(@"^\n", RegexOptions.Compiled);
-		private readonly Regex[] quoteHeadersRegex;
-		private readonly Regex[] signatureRegex;
+        foreach (var newLine in StringReverse(text).Split(new[] { "\n" }, StringSplitOptions.None))
+        {
+            var line = StringRTrim(newLine, '\n');
 
-		private static Email CreateEmail(List<FragmentDTO> emailFragments)
-		{
-			emailFragments.Reverse();
+            if (!this.IsSignature(line))
+            {
+                line = StringLTrim(line);
+            }
 
-			var transformedFragments = emailFragments.Select(fragment => new Fragment(
-				RegexStartsWithNewline.Replace(StringReverse(string.Join("\n", fragment.Lines)), string.Empty),
-				fragment.IsHidden,
-				fragment.IsSignature,
-				fragment.IsQuoted));
+            if (fragment != null)
+            {
+                var last = fragment.Lines[^1];
+                if (this.IsSignature(last))
+                {
+                    fragment.IsSignature = true;
+                    this.AddFragment(fragment);
+                    fragment = null;
+                }
+                else if (this.IsQuoteHeader(last))
+                {
+                    fragment.IsQuoted = true;
+                    this.AddFragment(fragment);
+                    fragment = null;
+                }
+            }
 
-			return new Email(transformedFragments);
-		}
+            var isQuoted = IsQuote(line);
 
-		private bool IsQuoteHeader(string line)
-		{
-			return quoteHeadersRegex.Any((regex) => regex.IsMatch(StringReverse(line)));
-		}
+            if (fragment == null || !this.IsFragmentLine(fragment, line, isQuoted))
+            {
+                if (fragment != null)
+                {
+                    this.AddFragment(fragment);
+                }
 
-		private bool IsSignature(string line)
-		{
-			var text = StringReverse(line);
+                fragment = new FragmentDTO { IsQuoted = isQuoted };
+            }
 
-			return signatureRegex.Any(regex => regex.IsMatch(text));
-		}
+            fragment.Lines.Add(line);
+        }
 
-		private static bool IsQuote(string line)
-		{
-			return QuoteRegex.IsMatch(line);
-		}
+        if (fragment != null)
+        {
+            this.AddFragment(fragment);
+        }
 
-		private static bool IsEmpty(FragmentDTO fragment)
-		{
-			return "".Equals(string.Join("", fragment.Lines), StringComparison.Ordinal);
-		}
+        var email = CreateEmail(this.fragments);
 
-		private bool IsFragmentLine(FragmentDTO fragment, string line, bool isQuoted)
-		{
-			return fragment.IsQuoted == isQuoted ||
-			  fragment.IsQuoted && (IsQuoteHeader(line) || line == "");
-		}
+        return email;
+    }
 
-		private void AddFragment(FragmentDTO fragment)
-		{
-			if (fragment.IsQuoted || fragment.IsSignature || IsEmpty(fragment))
-			{
-				fragment.IsHidden = true;
-			}
+    private static readonly Regex RegexStartsWithNewline = new Regex(@"^\n", RegexOptions.Compiled);
+    private readonly Regex[] quoteHeadersRegex;
+    private readonly Regex[] signatureRegex;
 
-			fragments.Add(fragment);
-		}
-	}
+    private static Email CreateEmail(List<FragmentDTO> emailFragments)
+    {
+        emailFragments.Reverse();
+
+        var transformedFragments = emailFragments.Select(fragment => new Fragment(
+            RegexStartsWithNewline.Replace(StringReverse(string.Join("\n", fragment.Lines)), string.Empty),
+            fragment.IsHidden,
+            fragment.IsSignature,
+            fragment.IsQuoted));
+
+        return new Email(transformedFragments);
+    }
+
+    private bool IsQuoteHeader(string line)
+    {
+        return this.quoteHeadersRegex.Any((regex) => regex.IsMatch(StringReverse(line)));
+    }
+
+    private bool IsSignature(string line)
+    {
+        var text = StringReverse(line);
+
+        return this.signatureRegex.Any(regex => regex.IsMatch(text));
+    }
+
+    private static bool IsQuote(string line)
+    {
+        return QuoteRegex.IsMatch(line);
+    }
+
+    private static bool IsEmpty(FragmentDTO fragment)
+    {
+        return "".Equals(string.Join("", fragment.Lines), StringComparison.Ordinal);
+    }
+
+    private bool IsFragmentLine(FragmentDTO fragment, string line, bool isQuoted)
+    {
+        return fragment.IsQuoted == isQuoted ||
+          (fragment.IsQuoted && (this.IsQuoteHeader(line) || line == ""));
+    }
+
+    private void AddFragment(FragmentDTO fragment)
+    {
+        if (fragment.IsQuoted || fragment.IsSignature || IsEmpty(fragment))
+        {
+            fragment.IsHidden = true;
+        }
+
+        this.fragments.Add(fragment);
+    }
 }

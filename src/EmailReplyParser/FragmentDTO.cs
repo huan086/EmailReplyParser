@@ -1,21 +1,20 @@
-﻿using System.Collections.Generic;
+namespace EPEmailReplyParser;
 
-namespace EPEmailReplyParser
+using System.Collections.Generic;
+
+// ReSharper disable once InconsistentNaming
+internal sealed class FragmentDTO
 {
-	// ReSharper disable once InconsistentNaming
-	internal sealed class FragmentDTO
-	{
-		public List<string> Lines;
-		public bool IsHidden;
-		public bool IsSignature;
-		public bool IsQuoted;
+    public List<string> Lines;
+    public bool IsHidden;
+    public bool IsSignature;
+    public bool IsQuoted;
 
-		public FragmentDTO()
-		{
-			Lines = new List<string>();
-			IsHidden = false;
-			IsSignature = false;
-			IsQuoted = false;
-		}
-	}
+    public FragmentDTO()
+    {
+        this.Lines = new List<string>();
+        this.IsHidden = false;
+        this.IsSignature = false;
+        this.IsQuoted = false;
+    }
 }

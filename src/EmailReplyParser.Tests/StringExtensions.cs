@@ -1,14 +1,13 @@
-﻿using System.Text.RegularExpressions;
+namespace EmailReplyParser.Tests;
+
+using System.Text.RegularExpressions;
 using EPEmailReplyParser;
 
-namespace EmailReplyParser.Tests
+public static class StringExtensions
 {
-	public static class StringExtensions
-	{
-		public static bool Test(this string value, Fragment fragment)
-		{
-			var r = new Regex(value);
-			return r.IsMatch(fragment.Content);
-		}
-	}
+    public static bool Test(this string value, Fragment fragment)
+    {
+        var r = new Regex(value);
+        return r.IsMatch(fragment.Content);
+    }
 }
