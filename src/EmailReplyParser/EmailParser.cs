@@ -2,20 +2,13 @@ namespace EPEmailReplyParser;
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 public sealed partial class EmailParser
 {
-    [GeneratedRegex(@"(>+)$", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 3000)]
+    [GeneratedRegex(@"^(>+)", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 3000)]
     private static partial Regex QuoteRegex { get; }
-
-    [GeneratedRegex(@"^\n", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 3000)]
-    private static partial Regex RegexStartsWithNewline { get; }
-
-    [GeneratedRegex(@"^\s+", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 3000)]
-    private static partial Regex RegexWhitespace { get; }
 
     [GeneratedRegex(@"\r\n", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 3000)]
     private static partial Regex RegexLinefeedWithCarriage { get; }
@@ -29,41 +22,6 @@ public sealed partial class EmailParser
     {
         this.quoteHeadersRegex = quoteHeaders;
         this.signatureRegex = signatureRegex;
-    }
-
-    private static string StringReverse(string text)
-    {
-        var textElements = new List<string>();
-
-        // To correctly preserve all graphemes
-        var textEnumerator = StringInfo.GetTextElementEnumerator(text);
-        while (textEnumerator.MoveNext())
-        {
-            textElements.Add(textEnumerator.GetTextElement());
-        }
-
-        textElements.Reverse();
-        return string.Concat(textElements);
-    }
-
-    private static string StringRTrim(string text, char mask)
-    {
-        for (var i = text.Length - 1; i >= 0; i--)
-        {
-            // ReSharper disable once InvertIf
-            if (mask != text[i])
-            {
-                text = text[..(i + 1)];
-                break;
-            }
-        }
-
-        return text;
-    }
-
-    private static string StringLTrim(string text)
-    {
-        return RegexWhitespace.Replace(text, string.Empty);
     }
 
     public static Email Parse(string text, IReadOnlyList<Regex> quoteHeaders = null, IReadOnlyList<Regex> signatureRegex = null)
@@ -96,13 +54,15 @@ public sealed partial class EmailParser
         text = this.FixBrokenSignatures(text);
 
         FragmentDto fragment = null;
-        foreach (var newLine in StringReverse(text).Split("\n", StringSplitOptions.None))
+        var remainingSpan = text.AsSpan();
+        int indexOfNewLine;
+        do
         {
-            var line = StringRTrim(newLine, '\n');
-
+            indexOfNewLine = remainingSpan.LastIndexOf('\n');
+            var line = remainingSpan[(indexOfNewLine + 1)..].TrimStart('\n');
             if (!this.IsSignature(line))
             {
-                line = StringLTrim(line);
+                line = line.TrimEnd();
             }
 
             if (fragment != null)
@@ -133,8 +93,14 @@ public sealed partial class EmailParser
                 fragment = new FragmentDto { IsQuoted = isQuoted };
             }
 
-            fragment.Lines.Add(line);
+            fragment.Lines.Add(line.ToString());
+
+            if (indexOfNewLine >= 0)
+            {
+                remainingSpan = remainingSpan[..indexOfNewLine];
+            }
         }
+        while (indexOfNewLine >= 0);
 
         if (fragment != null)
         {
@@ -148,30 +114,53 @@ public sealed partial class EmailParser
 
     private static Email CreateEmail(List<FragmentDto> emailFragments)
     {
-        emailFragments.Reverse();
+        var transformedFragments = emailFragments
+            .Reverse<FragmentDto>()
+            .Select(fragment =>
+            {
+                var lines = string.Join("\n", fragment.Lines.Reverse<string>());
+                if (lines.Length > 0 && lines[0] == '\n')
+                {
+                    lines = lines[1..];
+                }
 
-        var transformedFragments = emailFragments.Select(fragment => new Fragment(
-            RegexStartsWithNewline.Replace(StringReverse(string.Join("\n", fragment.Lines)), string.Empty),
-            fragment.IsHidden,
-            fragment.IsSignature,
-            fragment.IsQuoted));
+                return new Fragment(
+                    lines,
+                    fragment.IsHidden,
+                    fragment.IsSignature,
+                    fragment.IsQuoted);
+            });
 
         return new Email(transformedFragments);
     }
 
-    private bool IsQuoteHeader(string line)
+    private bool IsQuoteHeader(ReadOnlySpan<char> line)
     {
-        return this.quoteHeadersRegex.Any((regex) => regex.IsMatch(StringReverse(line)));
+        foreach (var regex in this.quoteHeadersRegex)
+        {
+            if (regex.IsMatch(line))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    private bool IsSignature(string line)
+    private bool IsSignature(ReadOnlySpan<char> line)
     {
-        var text = StringReverse(line);
+        foreach (var regex in this.signatureRegex)
+        {
+            if (regex.IsMatch(line))
+            {
+                return true;
+            }
+        }
 
-        return this.signatureRegex.Any(regex => regex.IsMatch(text));
+        return false;
     }
 
-    private static bool IsQuote(string line)
+    private static bool IsQuote(ReadOnlySpan<char> line)
     {
         return QuoteRegex.IsMatch(line);
     }
@@ -181,10 +170,10 @@ public sealed partial class EmailParser
         return fragment.Lines.All(line => string.Empty.Equals(line, StringComparison.Ordinal));
     }
 
-    private bool IsFragmentLine(FragmentDto fragment, string line, bool isQuoted)
+    private bool IsFragmentLine(FragmentDto fragment, ReadOnlySpan<char> line, bool isQuoted)
     {
         return fragment.IsQuoted == isQuoted ||
-          (fragment.IsQuoted && (this.IsQuoteHeader(line) || string.Empty.Equals(line, StringComparison.Ordinal)));
+          (fragment.IsQuoted && (this.IsQuoteHeader(line) || line.Length == 0));
     }
 
     private void AddFragment(FragmentDto fragment)
