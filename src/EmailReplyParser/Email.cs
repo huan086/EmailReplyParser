@@ -5,13 +5,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-public sealed class Email
+public sealed partial class Email
 {
-    public readonly Fragment[] Fragments;
+    [GeneratedRegex(@"~*$", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex Filter { get; }
+
+    public IReadOnlyList<Fragment> Fragments { get; }
 
     public Email(IEnumerable<Fragment> fragments)
     {
-        this.Fragments = fragments.ToArray();
+        this.Fragments = fragments.ToList().AsReadOnly();
     }
 
     public string GetVisibleText()
@@ -23,8 +26,6 @@ public sealed class Email
     {
         return this.FilterText(fragment => fragment.IsQuoted);
     }
-
-    private static readonly Regex Filter = new Regex("~*$");
 
     private string FilterText(Func<Fragment, bool> filter)
     {

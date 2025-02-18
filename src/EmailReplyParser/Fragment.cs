@@ -2,10 +2,10 @@ namespace EPEmailReplyParser;
 
 public sealed class Fragment
 {
-    public readonly string Content;
-    public readonly bool IsHidden;
-    public readonly bool IsSignature;
-    public readonly bool IsQuoted;
+    public string Content { get; private set; }
+    public bool IsHidden { get; private set; }
+    public bool IsSignature { get; private set; }
+    public bool IsQuoted { get; private set; }
 
     public Fragment(string content, bool isHidden, bool isSignature, bool isQuoted)
     {

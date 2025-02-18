@@ -1,86 +1,225 @@
 namespace EPEmailReplyParser;
 
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-public static class RegexPatterns
+public static partial class RegexPatterns
 {
-    public static readonly Regex[] QuoteHeadersRegex = {
-        new Regex(@"^\s*(On(?:(?!^>*\s*On\b|\bwrote(:)?)[\s\S]){0,1000}wrote:?)$", RegexOptions.Multiline | RegexOptions.Compiled), // On DATE, NAME <EMAIL> wrote:
-			new Regex(@"^\s*(Le(?:(?!^>*\s*Le\b|\bécrit:)[\s\S]){0,1000}écrit :)$", RegexOptions.Multiline | RegexOptions.Compiled), // Le DATE, NAME <EMAIL> a écrit :
-			new Regex(
-            @"^\s*(El(?:(?!^>*\s*El\b|\bescribió:)[\s\S]){0,1000}escribió:)$", RegexOptions.Multiline | RegexOptions.Compiled), // El DATE, NAME <EMAIL> escribió:
-			new Regex(
-            @"^\s*(Il(?:(?!^>*\s*Il\b|\bscritto:)[\s\S]){0,1000}scritto:)$", RegexOptions.Multiline | RegexOptions.Compiled), // Il DATE, NAME <EMAIL> ha scritto:
-			new Regex(
-            @"^\s*(Em(?:(?!^>*\s*Em\b|\bescreveu:)[\s\S]){0,1000}escreveu:)$", RegexOptions.Multiline | RegexOptions.Compiled), // Em DATE, NAME <EMAIL>escreveu:
-			new Regex(@"^\s*(Am\s.+\s)schrieb.+\s?(\[|<).+(\]|>):$", RegexOptions.Multiline | RegexOptions.Compiled), // Am DATE schrieb NAME <EMAIL>:
+    public static readonly IReadOnlyList<Regex> QuoteHeadersRegex =
+    [
+        OnDateNameEmailWroteEnRegex,
+        OnDateNameEmailWroteFrRegex,
+        OnDateNameEmailWroteEsRegex,
+        OnDateNameEmailWroteItRegex,
+        OnDateNameEmailWrotePtRegex,
+        OnDateNameEmailWroteDeRegex,
+        OnDateNameEmailWroteNlRegex,
+        OnDateNameEmailWrotePlRegex,
+        OnDateNameEmailWroteSvRegex,
+        OnDateNameEmailWroteFiRegex,
+        OnDateAndTimeNameEmailWroteDeRegex,
+        OnDateNameEmailWroteZhRegex,
+        OnDateNameEmailWroteKoRegex,
+        OnDateNameEmailWroteJpRegex,
+        NameEmailWroteDeRegex,
+        NameOnDateWroteEnRegex,
+        FromNameEmailEnRegex,
+        FromNameEmailDeRegex,
+        FromNameEmailEsRegex,
+        FromNameEmailNlRegex,
+        FromNameEmailPtRegex,
+        FromNameEmailZhRegex,
+        DateYmdNameEmailRegex,
+        DateWroteNameEmailDaRegex,
+        DateDmYNameEmailRegex,
+        TimeDateNameEmailRegex,
+        YearFromNameEmailEnRegex,
+        OriginalMessageEnRegex,
+        OriginalMessageDaRegex,
+        OriginalMessageFrRegex,
+    ];
 
-			new Regex(@"^\s*(Op\s[\s\S]+?schreef[\s\S]+:)$", RegexOptions.Multiline | RegexOptions.Compiled), // Il DATE, schreef NAME <EMAIL>:
-			new Regex(
-            @"^\s*((W\sdniu|Dnia)\s[\s\S]+?(pisze|napisał(\(a\))?):)$", RegexOptions.Multiline | RegexOptions.Compiled), // W dniu DATE, NAME <EMAIL> pisze|napisał:
-			new Regex(@"^\s*(Den\s.+\sskrev\s.+:)$", RegexOptions.Multiline | RegexOptions.Compiled), // Den DATE skrev NAME <EMAIL>:
-			new Regex(@"^\s*(pe\s.+\s.+kirjoitti:)$", RegexOptions.Multiline | RegexOptions.Compiled), // pe DATE NAME <EMAIL> kirjoitti: 
-			new Regex(@"^\s*(Am\s.+\sum\s.+\sschrieb\s.+:)$", RegexOptions.Multiline | RegexOptions.Compiled), // Am DATE um TIME schrieb NAME:
-			new Regex(@"^(在[\s\S]+写道：)$", RegexOptions.Multiline | RegexOptions.Compiled), // > 在 DATE, TIME, NAME 写道：
-			new Regex(@"^(20[0-9]{2}\..+\s작성:)$", RegexOptions.Multiline | RegexOptions.Compiled), // DATE TIME NAME 작성:
-			new Regex(@"^(20[0-9]{2}\/.+のメッセージ:)$", RegexOptions.Multiline | RegexOptions.Compiled), // DATE TIME、NAME のメッセージ:
-			new Regex(@"^(.+\s<.+>\sschrieb:)$", RegexOptions.Multiline | RegexOptions.Compiled), // NAME <EMAIL> schrieb:
-			new Regex(@"^(.+\son.*at.*wrote:)$", RegexOptions.Multiline | RegexOptions.Compiled), // NAME on DATE wrote:
+    public static readonly IReadOnlyList<Regex> SignatureRegex =
+    [
+        SeparatorRegex,
+        SeparatorLongDashRegex,
+        SentFromEnRegex,
+        GetOutlookEnRegex,
+        CheersEnRegex,
+        BestWishesEnRegex,
+        RegardsEnRegex,
+        SentByDeRegex,
+        SentByForDeRegex,
+        SentFromDaRegex,
+        SentFromFrRegex,
+        SentFromMyFrRegex,
+        SentFromByFrRegex,
+        GetOutlookFrRegex,
+        OkYouFrRegex,
+        RegardsFrRegex,
+        GoodDayFrRegex,
+        SentFromEsRegex,
+        ShippedFromNlRegex,
+        SentFromNlRegex,
+    ];
 
-        new Regex(
-            @"^\s*(Date\s?:[^\n]+\n?([^\n]+\n?){0,2}From\s?:[^\n]+\n?([^\n]+\n?){0,2}To\s?:[^\n]+\n?([^\n]+\n?){0,2}Subject\s?:[^\n]+)", RegexOptions.Multiline | RegexOptions.Compiled), // for headers DATE goes first
+    #region Quote headers
+    [GeneratedRegex(@"^-*\s*(On\s.+\s.+\n?wrote:{0,1})\s{0,1}-*$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OnDateNameEmailWroteEnRegex { get; }
 
-        new Regex(
-            @"^\s*(To\s?:[^\n]+\n?([^\n]+\n?){0,2}From\s?:[^\n]+\n?([^\n]+\n?){0,2}Subject\s?:[^\n]+)", RegexOptions.Multiline | RegexOptions.Compiled),// for headers TO goes first
+    [GeneratedRegex(@"^-*\s*(Le\s.+\s.+\n?écrit\s?:{0,1})\s{0,1}-*$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OnDateNameEmailWroteFrRegex { get; }
 
-        new Regex(
-            @"^\s*(\*?From\s?:[^\n]+\n?([^\n]+\n?){0,2}\*?To\s?:[^\n]+\n?([^\n]+\n?){0,2}\*?Subject\s?:[^\n]+)", RegexOptions.Multiline | RegexOptions.Compiled),// for headers FROM goes first
+    [GeneratedRegex(@"^-*\s*(El\s.+\s.+\n?escribió:{0,1})\s{0,1}-*$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OnDateNameEmailWroteEsRegex { get; }
 
+    [GeneratedRegex(@"^-*\s*(Il\s.+\s.+\n?scritto:{0,1})\s{0,1}-*$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OnDateNameEmailWroteItRegex { get; }
 
+    [GeneratedRegex(@"^-*\s*(Em\s.+\s.+\n?escreveu:{0,1})\s{0,1}-*$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OnDateNameEmailWrotePtRegex { get; }
 
-			//new Regex(
-		//		@"^\s*(From\s?:.+\s?\n?\s*[\[|<].+[\]|>])", RegexOptions.Multiline |RegexOptions.Compiled), // "From: NAME <EMAIL>" OR "From : NAME <EMAIL>" OR "From : NAME<EMAIL>"(With support whitespace before start and before <)
-			new Regex(
-            @"\s*(De\s?:.+\s?\n?\s*(\[|<).+(\]|>))", RegexOptions.Multiline |RegexOptions.Compiled), // "De: NAME <EMAIL>" OR "De : NAME <EMAIL>" OR "De : NAME<EMAIL>"  (With support whitespace before start and before <)
-			new Regex(
-            @"^\s*(Van\s?:.+\s?\n?\s*(\[|<).+(\]|>))", RegexOptions.Multiline |RegexOptions.Compiled), // "Van: NAME <EMAIL>" OR "Van : NAME <EMAIL>" OR "Van : NAME<EMAIL>"  (With support whitespace before start and before <)
-			new Regex(
-            @"^\s*(Da\s?:.+\s?\n?\s*(\[|<).+(\]|>))", RegexOptions.Multiline |RegexOptions.Compiled ), // "Da: NAME <EMAIL>" OR "Da : NAME <EMAIL>" OR "Da : NAME<EMAIL>"  (With support whitespace before start and before <)
-			new Regex(
-            @"^(20[0-9]{2})-([0-9]{2}).([0-9]{2}).([0-9]{2}):([0-9]{2})*.(.*)?\n?(.*)>:$", RegexOptions.Multiline | RegexOptions.Compiled), // 20YY-MM-DD HH:II GMT+01:00 NAME <EMAIL>:
-			new Regex(@"^\s*([a-z]{3,4}\.\s[\s\S]+\sskrev\s[\s\S]+:)$", RegexOptions.Multiline | RegexOptions.Compiled), // DATE skrev NAME <EMAIL>:
-			new Regex(
-            @"^([0-9]{2}).([0-9]{2}).(20[0-9]{2})(.*)(([0-9]{2}).([0-9]{2}))(.*)""( *)<(.*)>( *):$", RegexOptions.Multiline | RegexOptions.Compiled), // DD.MM.20YY HH:II NAME <EMAIL>
-        
-			   };
+    [GeneratedRegex(@"^\s*(Am\s.+\s)\n?\n?schrieb.+\s?(\[|<).+(\]|>):$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OnDateNameEmailWroteDeRegex { get; }
 
-    public static readonly Regex[] SignatureRegex =
-    {
-        new Regex(@"^\s*-{2,4}$", RegexOptions.Compiled),
-        new Regex(@"^\s*_{2,4}$", RegexOptions.Compiled),
-        new Regex(@"^—", RegexOptions.Compiled),
-        new Regex(@"^—\w", RegexOptions.Compiled),
-        new Regex(@"^-\w", RegexOptions.Compiled),
-        new Regex(@"^\u2013\w", RegexOptions.Compiled),
-        new Regex(@"^\u2014\w", RegexOptions.Compiled),
-        new Regex(@"^-- $", RegexOptions.Compiled),
-        new Regex(@"^-- \s*.+$", RegexOptions.Compiled),
-        new Regex(@"^Sent from (?:\s*.+)$", RegexOptions.Compiled),
-        new Regex(@"^Envoyé depuis (?:\s*.+)$", RegexOptions.Compiled),
-        new Regex(@"^Enviado desde (?:\s*.+)$", RegexOptions.Compiled),
-        new Regex(@"^\+{2,4}$", RegexOptions.Compiled),
-        new Regex(@"^\={2,4}$", RegexOptions.Compiled),
-        new Regex(@"^________________________________$", RegexOptions.Compiled),
-        new Regex(@"^Get Outlook for (iOS|Android)\s?<https?://[a-z0-9.-]+[a-zA-Z0-9/.,_:;#?%!@$&'()*+~=-]*>.*$", RegexOptions.Compiled),
-        new Regex(@"^Outlook für (iOS|Android) beziehen\s?<https?://[a-z0-9.-]+[a-zA-Z0-9/.,_:;#?%!@$&'()*+~=-]*>.*$", RegexOptions.Compiled),
+    [GeneratedRegex(@"^\s*(Op\s[\s\S]+?\n?schreef[\s\S]+:)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OnDateNameEmailWroteNlRegex { get; }
 
-        new Regex(@"^Diese Nachricht wurde von mein.* gesendet\.?$", RegexOptions.Compiled),
-        new Regex(@"^Von mein.* gesendet\.?$", RegexOptions.Compiled),
-        new Regex(@"^Gesendet von mein.* ([a-zA-Z0-9_-]+\s*){1,3}\.?$", RegexOptions.Compiled),
-        new Regex(@"^\s*--------\s*Original\s?Message\s*--------\s*$", RegexOptions.Compiled),
+    [GeneratedRegex(@"^\s*((W\sdniu|Dnia)\s[\s\S]+?(pisze|napisał(\(a\))?):)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OnDateNameEmailWrotePlRegex { get; }
 
-        //  ~R/^Diese Nachricht wurde von mein.* gesendet\.?$/,
-        // ~r/^Von mein.* gesendet\.?$/ ])	        ~R/^Von mein.* gesendet\.?$/,
-        //  ~R/^Gesendet von mein.* ([a-zA-Z0-9_-]+\s*){1,3}\.?$/,
-    };
+    [GeneratedRegex(@"^\s*(Den\s.+\s\n?skrev\s.+:)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OnDateNameEmailWroteSvRegex { get; }
+
+    [GeneratedRegex(@"^\s*(pe\s.+\s.+\n?kirjoitti:)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OnDateNameEmailWroteFiRegex { get; }
+
+    [GeneratedRegex(@"^\s*(Am\s.+\sum\s.+\s\n?schrieb\s.+:)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OnDateAndTimeNameEmailWroteDeRegex { get; }
+
+    [GeneratedRegex(@"^(在[\s\S]+写道：)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OnDateNameEmailWroteZhRegex { get; }
+
+    [GeneratedRegex(@"^(20[0-9]{2}\..+\s작성:)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OnDateNameEmailWroteKoRegex { get; }
+
+    [GeneratedRegex(@"^(20[0-9]{2}\/.+のメッセージ:)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OnDateNameEmailWroteJpRegex { get; }
+
+    [GeneratedRegex(@"^(.+[\t\p{Zs}]<.+>\sschrieb:)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex NameEmailWroteDeRegex { get; }
+
+    [GeneratedRegex(@"^(.+[\t\p{Zs}]on.*at.*wrote:)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex NameOnDateWroteEnRegex { get; }
+
+    [GeneratedRegex(@"^\s*(From\s?:.+\s?\n?\s*[\[|<].+[\]|>])", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex FromNameEmailEnRegex { get; }
+
+    [GeneratedRegex(@"^\s*(Von\s?:.+\s?\n?\s*[\[|<].+[\]|>])", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex FromNameEmailDeRegex { get; }
+
+    [GeneratedRegex(@"^\s*(De\s?:.+\s?\n?\s*(\[|<).+(\]|>))", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex FromNameEmailEsRegex { get; }
+
+    [GeneratedRegex(@"^\s*(Van\s?:.+\s?\n?\s*(\[|<).+(\]|>))", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex FromNameEmailNlRegex { get; }
+
+    [GeneratedRegex(@"^\s*(Da\s?:.+\s?\n?\s*(\[|<).+(\]|>))", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex FromNameEmailPtRegex { get; }
+
+    [GeneratedRegex(@"^\s*(寄件者\s?[:：].+\s?\n?\s*(\[|<).+(\]|>))", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex FromNameEmailZhRegex { get; }
+
+    [GeneratedRegex(@"^(20[0-9]{2})-([0-9]{2}).([0-9]{2}).([0-9]{2}):([0-9]{2})\n?(.*)>:$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex DateYmdNameEmailRegex { get; }
+
+    [GeneratedRegex(@"^\s*([a-z]{3,4}\.\s[\s\S]+\sskrev\s[\s\S]+:)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex DateWroteNameEmailDaRegex { get; }
+
+    [GeneratedRegex(@"^([0-9]{2}).([0-9]{2}).(20[0-9]{2})(.*)(([0-9]{2}).([0-9]{2}))(.*)""( *)<(.*)>( *):$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex DateDmYNameEmailRegex { get; }
+
+    [GeneratedRegex(@"^[0-9]{2}:[0-9]{2}(.*)[0-9]{4}(.*)""( *)<(.*)>( *):$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex TimeDateNameEmailRegex { get; }
+
+    [GeneratedRegex(@"^(.*)[0-9]{4}(.*)from(.*)<(.*)>:$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex YearFromNameEmailEnRegex { get; }
+
+    [GeneratedRegex(@"^[\t\p{Zs}]*-{1,12} ?original message ?-{1,12}$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OriginalMessageEnRegex { get; }
+
+    [GeneratedRegex(@"^[\t\p{Zs}]*-{1,12} ?oprindelig besked ?-{1,12}$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OriginalMessageDaRegex { get; }
+
+    [GeneratedRegex(@"^[\t\p{Zs}]*-{1,12} ?message d'origine ?-{1,12}$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OriginalMessageFrRegex { get; }
+    #endregion
+
+    #region Signatures
+    [GeneratedRegex(@"^\s*[-_+=]{2,4}$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex SeparatorRegex { get; }
+
+    [GeneratedRegex(@"^________________________________$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex SeparatorLongDashRegex { get; }
+
+    // EN
+    [GeneratedRegex(@"^Sent from (?:\s*.+)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex SentFromEnRegex { get; }
+
+    [GeneratedRegex(@"^Get Outlook for (?:\s*.+).*", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex GetOutlookEnRegex { get; }
+
+    [GeneratedRegex(@"^Cheers,?!?$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex CheersEnRegex { get; }
+
+    [GeneratedRegex(@"^Best wishes,?!?$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex BestWishesEnRegex { get; }
+
+    [GeneratedRegex(@"^\w{0,20}\s?(\sand\s)?Regards,?!?！?$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex RegardsEnRegex { get; }
+
+    // DE
+    [GeneratedRegex(@"^Von (?:\s*.+) gesendet$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex SentByDeRegex { get; }
+
+    [GeneratedRegex(@"^Gesendet von (?:\s*.+) für (?:\s*.+)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex SentByForDeRegex { get; }
+
+    // DA
+    [GeneratedRegex(@"^Sendt fra (?:\s*.+)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex SentFromDaRegex { get; }
+
+    // FR
+    [GeneratedRegex(@"^Envoyé depuis (?:\s*.+)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex SentFromFrRegex { get; }
+
+    [GeneratedRegex(@"^Envoyé de mon (?:\s*.+)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex SentFromMyFrRegex { get; }
+
+    [GeneratedRegex(@"^Envoyé à partir de (?:\s*.+)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex SentFromByFrRegex { get; }
+
+    [GeneratedRegex(@"^Télécharger Outlook pour (?:\s*.+).*", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex GetOutlookFrRegex { get; }
+
+    [GeneratedRegex(@"^Bien . vous,?!?$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex OkYouFrRegex { get; }
+
+    [GeneratedRegex(@"^\w{0,20}\s?cordialement,?!?$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex RegardsFrRegex { get; }
+
+    [GeneratedRegex(@"^Bonne (journ.e|soir.e)!?$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex GoodDayFrRegex { get; }
+
+    // ES
+    [GeneratedRegex(@"^Enviado desde (?:\s*.+)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex SentFromEsRegex { get; }
+
+    // NL
+    [GeneratedRegex(@"^Verzonden vanaf (?:\s*.+)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex ShippedFromNlRegex { get; }
+
+    [GeneratedRegex(@"^Verstuurd vanaf (?:\s*.+)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Multiline, matchTimeoutMilliseconds: 3000)]
+    private static partial Regex SentFromNlRegex { get; }
+    #endregion
 }
